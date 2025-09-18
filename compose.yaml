@@ -1,0 +1,16 @@
+services:
+  coldmail:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      STREAMLIT_SERVER_PORT: 7860
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      USER_AGENT: ${USER_AGENT:-Mozilla/5.0}
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./:/app # dev-friendly: live code reload
+    restart: unless-stopped
