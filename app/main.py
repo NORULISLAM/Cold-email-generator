@@ -1,12 +1,18 @@
-# set writable caches BEFORE other imports (fix PermissionError: '/.cache')
+# Force writable caches BEFORE any other imports
 import os
 import pathlib
 
-os.environ.setdefault("XDG_CACHE_HOME", "/tmp/.cache")
-os.environ.setdefault("HF_HOME", "/tmp/hf")
-os.environ.setdefault("TRANSFORMERS_CACHE", "/tmp/hf/transformers")
-os.environ.setdefault("HF_HUB_CACHE", "/tmp/hf/hub")
-os.environ.setdefault("USER_AGENT", "Mozilla/5.0")
+# Always override (not setdefault)
+os.environ["XDG_CACHE_HOME"]      = "/tmp/.cache"
+os.environ["HF_HOME"]             = "/tmp/hf"
+os.environ["TRANSFORMERS_CACHE"]  = "/tmp/hf/transformers"
+os.environ["HF_HUB_CACHE"]        = "/tmp/hf/hub"
+os.environ["USER_AGENT"]          = "Mozilla/5.0"
+
+# Optional: silence Chroma telemetry noise
+os.environ["ANONYMIZED_TELEMETRY"] = "false"
+os.environ["CHROMA_TELEMETRY_IMPLEMENTATION"] = "none"
+
 for p in ("/tmp/.cache", "/tmp/hf", "/tmp/hf/transformers", "/tmp/hf/hub"):
     pathlib.Path(p).mkdir(parents=True, exist_ok=True)
 
@@ -52,7 +58,7 @@ def create_streamlit_app(llm, portfolio, clean_text_fn):
     st.title("📧 Cold Mail Generator")
     url_input = st.text_input(
         "Enter a URL:",
-        value="https://careers.nike.com/software-engineer-ii-o9-itc/job/R-68436"
+        value="https://job-boards.greenhouse.io/zeals/jobs/5572548004"
     )
     use_raw = st.checkbox("Debug: use RAW text (skip clean_text)", value=False)
 
