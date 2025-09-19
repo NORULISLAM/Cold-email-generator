@@ -16,32 +16,33 @@ class Portfolio:
         self.collection = self.chroma_client.get_or_create_collection(name="portfolio")
 
     def load_portfolio(self):
-        # Fill once per process
+        """Index ONLY Techstack strings. No links stored."""
         if self.collection.count() == 0:
-            docs, metas, ids = [], [], []
+            docs, ids = [], []
             for _, row in self.data.iterrows():
-                docs.append(str(row["Techstack"]))
-                metas.append({"links": str(row["Links"])})
+                tech = str(row.get("Techstack", "")).strip()
+                if not tech:
+                    continue
+                docs.append(tech)
                 ids.append(str(uuid.uuid4()))
-            self.collection.add(documents=docs, metadatas=metas, ids=ids)
+            # No metadatas field at all
+            self.collection.add(documents=docs, ids=ids)
 
-    def query_links(self, skills):
+    def query_techstack(self, skills, n_results=5):
+        """Return top-matching Techstack strings (no links)."""
         if not skills:
             return []
         res = self.collection.query(
             query_texts=list(skills),
-            n_results=2,
-            include=["metadatas"],
+            n_results=n_results,
+            include=["documents"],
         )
-        md = res.get("metadatas") or []   # guard None
-        links, seen = [], set()
-        for group in md or []:
-            if not group:
-                continue
-            for m in group:
-                if isinstance(m, dict):
-                    link = m.get("links")
-                    if link and link not in seen:
-                        seen.add(link)
-                        links.append(link)
-        return links
+        docs_groups = res.get("documents") or []
+        out, seen = [], set()
+        for group in docs_groups:
+            for d in group or []:
+                d = (d or "").strip()
+                if d and d not in seen:
+                    seen.add(d)
+                    out.append(d)
+        return out
