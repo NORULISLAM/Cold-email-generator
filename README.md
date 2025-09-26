@@ -35,6 +35,7 @@ Cold email generator for services company using groq, langchain and streamlit. I
 venv\Scripts\activate
 
 ```
+
 How It Now Works:
 
 URL Analysis: Automatically extracts company name from job board URLs
@@ -44,8 +45,6 @@ Skill Matching: Maps required skills to your portfolio techstack
 Dynamic Email: Generates personalized emails using actual job data
 Multiple Jobs: Handles multiple job postings with different personalized emails
 
-
-
 The system will now:
 
 Auto-detect "Zeals" as the company name
@@ -54,9 +53,7 @@ Use this role throughout the email instead of the default "AI/ML Engineer"
 Reference the specific skills mentioned in the job posting
 Create a truly personalized email for that specific role
 
-
-
 Copyright (C) Norul. All rights reserved.
 
 **Additional Terms:**
-Do not use without permission
+Do not use without permission from Norul.

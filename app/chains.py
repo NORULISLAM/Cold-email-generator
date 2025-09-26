@@ -11,9 +11,15 @@ load_dotenv()
 
 
 class Chain:
+    # Prompt registry version
+    PROMPT_VERSION = "email-v1.0"
 
     def __init__(self):
-        self.llm = ChatGroq(temperature=0, groq_api_key=os.getenv("GROQ_API_KEY"), model_name="llama-3.3-70b-versatile")
+        self.llm = ChatGroq(
+            temperature=0,
+            groq_api_key=os.getenv("GROQ_API_KEY"),
+            model_name="llama-3.3-70b-versatile"
+        )
 
     def extract_jobs(self, cleaned_text):
         prompt_extract = PromptTemplate.from_template(
@@ -45,16 +51,16 @@ class Chain:
         # Extract key information from the job data
         actual_role = extracted_job_data.get('role', role_title) if extracted_job_data else role_title
         required_skills = extracted_job_data.get('skills', []) if extracted_job_data else []
-        experience_level = extracted_job_data.get('experience',
-                                                  'Not specified') if extracted_job_data else 'Not specified'
-        job_desc_summary = extracted_job_data.get('description',
-                                                  'Not available') if extracted_job_data else job_description
+        experience_level = extracted_job_data.get('experience', 'Not specified') if extracted_job_data else 'Not specified'
+        job_desc_summary = extracted_job_data.get('description', 'Not available') if extracted_job_data else job_description
 
         # Create dynamic skill matching
         skill_matches = self._match_skills_to_portfolio(required_skills, techstack_list)
 
         prompt_email = PromptTemplate.from_template(
             """
+            ### PROMPT_VERSION: {prompt_version}
+
             ### INSTRUCTION:
             You are an expert AI-powered career strategist. Compose a concise, high-impact cold email on behalf of Norul Islam (AI/ML Engineer). 
             Write as Norul in a professional, confident tone that directly addresses the specific job requirements.
@@ -115,7 +121,7 @@ class Chain:
             - 金融系フロント：https://money-forward-app.vercel.app/
             - Microservices（コード）：https://github.com/NORULISLAM/Micro-services
 
-            最短15分でお打ち合わせの機会を頂ければ、要件と成果物の直結イメージを具体的にご説明いたします。ご検討を何卒よろしくお願い申し上げます。
+            最短15分でお打ち合わせの機会を頂ければ、要件と成果物の直結イメージを具体的にご説明いたします。ご検討を何卒よろしくお願いいたします。
 
             何卒よろしくお願い申し上げます。
             Norul Islam
@@ -156,6 +162,7 @@ class Chain:
 
         chain_email = prompt_email | self.llm
         res = chain_email.invoke({
+            "prompt_version": Chain.PROMPT_VERSION,
             "company_name": company_name,
             "recipient_name": recipient_name,
             "actual_role": actual_role,
@@ -175,9 +182,10 @@ class Chain:
 
         matches = []
         for skill in required_skills:
-            skill_lower = skill.lower()
+            skill_lower = (skill or "").lower()
             for tech in techstack_list:
-                if skill_lower in tech.lower() or tech.lower() in skill_lower:
+                t = (tech or "").lower()
+                if skill_lower and (skill_lower in t or t in skill_lower):
                     matches.append(f"- {skill} → Portfolio experience: {tech}")
                     break
 
